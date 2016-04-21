@@ -1,0 +1,21 @@
+<div class="row">
+    <ul class="thumbnails">
+    {% for art in art_list %}
+
+
+                <li class="span3">
+                 <div class="info">
+                   <strong>{% if art.title %}{{ art.title }}{% else %} Untitled {% endif %}</strong>
+                 </div>
+                 <div><img src="/image/{{ art.key.urlsafe() }}" /></div>
+                </li>
+
+    {% endfor %}
+    </ul>
+
+</div>
+<div class="row">
+  <div>
+    <p>pagination goes here</p>
+  </div>
+</div>
