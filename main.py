@@ -22,35 +22,42 @@ import webapp2
 
 import jinja2
 
+from models.art import Art
 from models.profile import Profile
 
-
 JINJA_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
-    extensions=['jinja2.ext.autoescape'],
-    autoescape=True)
+        loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+        extensions=['jinja2.ext.autoescape'],
+        autoescape=True)
 
 
 class _PageHandler(webapp2.RequestHandler):
-  def __init__(self, request=None, response=None):
-    super(_PageHandler, self).__init__(request, response)
-    self.template_values = {}
-    self.user = users.get_current_user()
-    if(self.user):
-      self.template_values['user_name'] = self.user.nickname()
-      self.profile = Profile.query(Profile.user_id==self.user.user_id()).get()
-      self.template_values['profile_unique_name'] = self.profile.profile_unique_name
-      self.LogInOutURL = users.create_logout_url('/')
-    else:
-      self.LogInOutURL = users.create_login_url('/')
+    def __init__(self, request=None, response=None):
+        super(_PageHandler, self).__init__(request, response)
+        self.template_values = {}
+        self.user = users.get_current_user()
+        if self.user:
+            self.template_values['user_name'] = self.user.nickname()
+            self.profile = Profile.query(Profile.user_id == self.user.user_id()).get()
+            # self.template_values['profile_unique_name'] = self.profile.profile_unique_name
+            self.LogInOutURL = users.create_logout_url('/')
+        else:
+            self.LogInOutURL = users.create_login_url('/')
 
-    self.template_values['LogInOutURL'] = self.LogInOutURL
+        self.template_values['LogInOutURL'] = self.LogInOutURL
 
 
 class MainHandler(_PageHandler):
     def get(self):
+        if users.get_current_user():
+            user_id = users.get_current_user().user_id()
+            user_profile = Profile(user_id=user_id)
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
 
-        self.template_values['art_list'] = []
+        art_item = Art()
+        art_list = art_item.get_art()
+        self.template_values['art_list'] = art_list
 
         template = JINJA_ENVIRONMENT.get_template('templates/index.html')
         self.response.write(template.render(self.template_values))
