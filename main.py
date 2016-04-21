@@ -52,8 +52,6 @@ class MainHandler(_PageHandler):
         if users.get_current_user():
             user_id = users.get_current_user().user_id()
             user_profile = Profile(user_id=user_id)
-        else:
-            self.redirect(users.create_login_url(self.request.uri))
 
         art_item = Art()
         art_list = art_item.get_art()

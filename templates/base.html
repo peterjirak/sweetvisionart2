@@ -46,9 +46,9 @@
                  <li><a href="/upload">Upload</a></li>
                </ul>
                <p class="navbar-text">		{% if user_name %}
-                    Welcome <a href="{{ profile_unique_name }}">{{ user_name }}</a> <a href="{{ LogInOut }}">log out</a>
+                    Welcome <a href="{{ profile_unique_name }}">{{ user_name }}</a> <a href="{{ LogInOutURL }}">log out</a>
                   {% else %}
-                    <a href="{{ LogInOut }}">Please login</a>
+                    <a href="{{ LogInOutURL }}">Please login</a>
                   {% endif %}
                </p>
              </div><!--/.nav-collapse -->
