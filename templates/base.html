@@ -14,6 +14,7 @@
     <script  type="text/javascript" src="/assets/js/jquery-1.8.3.min.js" ></script>
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="/assets/js/bootstrap.min.js"></script>
+    <script  type="text/javascript" src="/assets/js/sweetvision.js" ></script>
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -46,7 +47,15 @@
                  <li><a href="/upload">Upload</a></li>
                </ul>
                <p class="navbar-text">		{% if display_user_name %}
-                    Welcome <a href="{{ profile_unique_name }}">{{ display_user_name }}</a> <a href="{{ LogInOutURL }}">log out</a>
+                    Welcome <a href="{{ profile_unique_name }}">{{ display_user_name }}</a>
+
+                    <!-- TODO Implement log out to log a user out of Sweetvision
+                         TODO Implement switch user to allow a user to switch the Google authenticated
+
+                         <a class="js-deauthenticate" href="#">log out</a>
+
+                    -->
+
                   {% else %}
                     <a href="{{ LogInOutURL }}">Please login</a>
                   {% endif %}
