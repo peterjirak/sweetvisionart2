@@ -1,37 +1,74 @@
-import time
-import webapp2_extras.appengine.auth.models
-
+import re
 from google.appengine.ext import ndb
 
-from webapp2_extras import security
 
-class User(webapp2_extras.appengine.auth.models.User):
-  def set_password(self, raw_password):
-    """Sets the password for the current user
+class User(ndb.Model):
+    user_id = ndb.StringProperty(required=True)
+    email = ndb.StringProperty(required=True)
+    first_name = ndb.StringProperty(required=True)
+    last_name = ndb.StringProperty(required=True)
+    created_at = ndb.DateTimeProperty(required=True, auto_now_add=True)
 
-    :param raw_password:
-        The raw password which will be hashed and stored
-    """
-    self.password = security.generate_password_hash(raw_password, length=12)
+    @classmethod
+    def get_user_by_id(cls, user_id):
+        if user_id is None or re.match(r"^\s*$", user_id):
+            raise ValueError("User.get_user_by_id requires a user_id.")
+        else:
+            user_id = str(user_id)
+        user_id = user_id.strip()
+        key = ndb.Key('User', user_id)
+        qry = cls.query(ancestor=key)
 
-  @classmethod
-  def get_by_auth_token(cls, user_id, token, subject='auth'):
-    """Returns a user object based on a user ID and token.
+        user_inst = qry.get()
 
-    :param user_id:
-        The user_id of the requesting user.
-    :param token:
-        The token string to be verified.
-    :returns:
-        A tuple ``(User, timestamp)``, with a user object and
-        the token timestamp, or ``(None, None)`` if both were not found.
-    """
-    token_key = cls.token_model.get_key(user_id, subject, token)
-    user_key = ndb.Key(cls, user_id)
-    # Use get_multi() to save a RPC call.
-    valid_token, user = ndb.get_multi([token_key, user_key])
-    if valid_token and user:
-        timestamp = int(time.mktime(valid_token.created.timetuple()))
-        return user, timestamp
+        return user_inst
 
-    return None, None
+    @classmethod
+    def add_or_get_user(cls, user_id, email, first_name, last_name):
+        if user_id is None or re.match(r"^\s*$", user_id):
+            raise ValueError("user_id is required for a User")
+        else:
+            user_id = str(user_id)
+
+        if email is None or re.match(r"^\s*$", email):
+            raise ValueError("email is required for a User")
+        elif first_name is None or re.match(r"^\s*$", first_name):
+            raise ValueError("first_name is required for a User")
+        elif last_name is None or re.match(r"^\s*$", last_name):
+            raise ValueError("last_name is required for a User")
+
+        user_id = user_id.strip()
+        email = email.strip()
+        first_name = first_name.strip()
+        last_name = last_name.strip()
+
+        user_inst = User.get_user_by_id(user_id)
+
+        if user_inst is not None:
+            if user_inst.email != email:
+                raise ValueError("A user exists for the user_id %s but the email is '%s', not '%s'." %
+                                 (user_id, user_inst.email, email))
+            elif user_inst.first_name != first_name:
+                raise ValueError(("A user exists for the user_id %s with the email '%s', but the first_name is '%s', " +
+                                  "not '%s'.") % (user_id, email, user_inst.first_name, first_name))
+            elif user_inst.last_name != last_name:
+                raise ValueError(("A user exists for the user_id %s with the email '%s' and first_name '%s', but the " +
+                                  "last_name is '%s', not '%s'.") % (user_id, email, first_name, user_inst.last_name,
+                                                                     last_name))
+            else:
+                return user_inst
+
+        qry = cls.query(User.email == email)
+
+        user_inst = qry.get()
+
+        if user_inst:
+            raise ValueError("A user exists with the email '%s', but its user_id is '%s', not '%s'." %
+                             (email, user_inst.user_id, user_id))
+
+        key = ndb.Key('User', user_id)
+
+        user_inst = User(parent=key, user_id=user_id, email=email, first_name=first_name, last_name=last_name)
+        user_inst.put()
+
+        return user_inst

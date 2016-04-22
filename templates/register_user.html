@@ -1,0 +1,24 @@
+{% extends "templates/base.html" %}
+{% block content %}
+    <h1>Register</h1>
+    <div class="container">
+        <form id="user_registration" action="/register_user" method="post">
+            <div class="form-group">
+                <label>First Name: <input class="form-control" id="first_name" name="first_name" type="text" placeholder="First Name" required/></label>
+            </div>
+            <div class="form-group">
+                <label>Last Name: <input class="form-control" id="last_name" name="last_name" type="text" placeholder="Last Name" required/></label>
+            </div>
+        {% if email %}
+            <div class="form-group">
+                <label>Email: <input class="form-control" id="email" name="email" type="email" value="{{ email }}" readonly/></label>
+            </div>
+        {% else %}
+            <div class="form-group">
+                <label>Email: <input class="form-control" id="email" name="email" type="email" placeholder="Email" required/></label>
+            </div>
+        {% endif %}
+            <button type="submit" class="btn btn-default">Register</button>
+        </form>
+    </div>
+{% endblock %}

@@ -1,12 +1,12 @@
 from google.appengine.api import users
 
-from handlers.base import BasePageHandler
+from handlers.base_registered_user_handler import BaseRegisteredUserPageHandler
 
 from models.art import Art
 from models.profile import Profile
 
 
-class MainHandler(BasePageHandler):
+class MainHandler(BaseRegisteredUserPageHandler):
     def get(self):
         if users.get_current_user():
             user_id = users.get_current_user().user_id()

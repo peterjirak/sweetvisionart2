@@ -10,7 +10,7 @@ class UploadHandler(BasePageHandler):
     def get(self):
         # TODO : Require login to render the upload template:
         if not users.get_current_user():
-            self.redirect("/")
+            return self.redirect("/register_user")
         template = self.get_template('templates/file_upload.html')
         self.response.write(template.render(self.template_values))
 
