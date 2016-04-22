@@ -4,6 +4,7 @@ import webtest
 import main
 from models.user import User
 
+
 class HandlerTest(unittest.TestCase):
     def setUp(self):
         self.testbed = testbed.Testbed()
@@ -45,3 +46,20 @@ class HandlerTest(unittest.TestCase):
         User.add_or_get_user(user_id=2, email='test_user2@test.com', first_name='Test2', last_name='User')
         response = self.testapp.get('/')
         self.assertEqual(response.status_int, 200)
+
+    def test_register_a_user(self):
+
+        self.setup_non_registered_user(user_email='test_user3@test.com',
+                                       user_id=3,
+                                       user_is_admin=0)
+
+        response = self.testapp.post('/register_user', {'first_name': 'Test3',
+                                                        'last_name': 'User'})
+        self.assertEqual(response.status_int, 302)
+
+        registered_user = User.get_user_by_id(3)
+
+        self.assertEqual(registered_user.user_id, '3')
+        self.assertEqual(registered_user.email, 'test_user3@test.com')
+        self.assertEqual(registered_user.first_name, 'Test3')
+        self.assertEqual(registered_user.last_name, 'User')
