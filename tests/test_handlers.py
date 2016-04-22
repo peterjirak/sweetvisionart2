@@ -12,6 +12,7 @@ class HandlerTest(unittest.TestCase):
         self.testbed.init_user_stub()
         self.testbed.init_memcache_stub()
         self.testbed.init_datastore_v3_stub()
+        self.testbed.init_images_stub()
         self.testapp = webtest.TestApp(main.app)
 
     def tearDown(self):
@@ -63,3 +64,11 @@ class HandlerTest(unittest.TestCase):
         self.assertEqual(registered_user.email, 'test_user3@test.com')
         self.assertEqual(registered_user.first_name, 'Test3')
         self.assertEqual(registered_user.last_name, 'User')
+
+    def test_accessing_upload_page_triggers_login_redirect(self):
+
+        response = self.testapp.get('/register_user')
+
+        self.assertEqual(response.status_int, 302)
+
+        self.assertRegexpMatches(response.headers.get('Location'), r"https://www\.google\.com/accounts/Login\?continue=http.*/register_user" )
