@@ -11,10 +11,12 @@ class User(ndb.Model):
 
     @classmethod
     def get_user_by_id(cls, user_id):
+        if user_id is not None:
+            user_id = str(user_id)
+
         if user_id is None or re.match(r"^\s*$", user_id):
             raise ValueError("User.get_user_by_id requires a user_id.")
-        else:
-            user_id = str(user_id)
+
         user_id = user_id.strip()
         key = ndb.Key('User', user_id)
         qry = cls.query(ancestor=key)
@@ -25,10 +27,11 @@ class User(ndb.Model):
 
     @classmethod
     def add_or_get_user(cls, user_id, email, first_name, last_name):
+        if user_id is not None:
+            user_id = str(user_id)
+
         if user_id is None or re.match(r"^\s*$", user_id):
             raise ValueError("user_id is required for a User")
-        else:
-            user_id = str(user_id)
 
         if email is None or re.match(r"^\s*$", email):
             raise ValueError("email is required for a User")

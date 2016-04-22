@@ -2,24 +2,46 @@ from google.appengine.ext import testbed
 import unittest
 import webtest
 import main
-
+from models.user import User
 
 class HandlerTest(unittest.TestCase):
     def setUp(self):
         self.testbed = testbed.Testbed()
         self.testbed.activate()
         self.testbed.init_user_stub()
+        self.testbed.init_memcache_stub()
         self.testbed.init_datastore_v3_stub()
-        self.testbed.setup_env(USER_EMAIL='tester_1@sweetvision.com',
-                               USER_ID='1',
-                               USER_IS_ADMIN='0',
-                               overwrite=True)
         self.testapp = webtest.TestApp(main.app)
 
     def tearDown(self):
         self.testbed.deactivate()
 
-    def test_sample_request(self):
+    def setup_non_registered_user(self, user_email, user_id, user_is_admin):
+        self.testbed.setup_env(USER_EMAIL=user_email,
+                               USER_ID=str(user_id),
+                               USER_IS_ADMIN=str(user_is_admin),
+                               overwrite=True)
+
+    def test_get_main_page_without_logged_in_user(self):
         """Test a GET / and check a 200 status"""
+        response = self.testapp.get('/')
+        self.assertEqual(response.status_int, 200)
+
+    def test_get_main_page_with_non_registered_user(self):
+        """Test a GET / and check a 302 status"""
+        self.setup_non_registered_user(user_email='test_user1@test.com',
+                                       user_id=1,
+                                       user_is_admin=0)
+        response = self.testapp.get('/')
+        self.assertEqual(response.status_int, 302)
+
+    def test_get_main_page_with_registered_user(self):
+        """Test a GET / and check a 200 status"""
+        self.setup_non_registered_user(user_email='test_user2@test.com',
+                                       user_id=2,
+                                       user_is_admin=0)
+
+        # Add a user to the datastore -- a registered user is one in the datastore:
+        User.add_or_get_user(user_id=2, email='test_user2@test.com', first_name='Test2', last_name='User')
         response = self.testapp.get('/')
         self.assertEqual(response.status_int, 200)
