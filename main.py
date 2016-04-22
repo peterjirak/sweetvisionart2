@@ -18,6 +18,9 @@
 import os
 
 from google.appengine.api import users
+from google.appengine.ext import ndb
+from google.appengine.api import images
+
 import webapp2
 
 import jinja2
@@ -61,6 +64,40 @@ class MainHandler(_PageHandler):
         self.response.write(template.render(self.template_values))
 
 
+class ImageHandler(webapp2.RequestHandler):
+    def get(self, id, flag=None):
+        art_for_image = Art()
+        key = ndb.Key(urlsafe=id)
+        art_for_image = art_for_image.get_art_by_id(key.id())
+        scaled = images.resize(art_for_image.image, height=300)
+
+        if art_for_image:
+            self.response.headers['Content-Type'] = 'image/jpeg'
+            self.response.out.write(scaled)
+
+
+class UploadHandler(webapp2.RequestHandler):
+    def get(self):
+        if not users.get_current_user():
+            self.redirect("/")
+        template = JINJA_ENVIRONMENT.get_template('templates/file_upload.html')
+        self.response.write(template.render())
+
+    def post(self):
+        # TODO : Handle post request from non-logged in user (Respond with an HTTP Error code of 403 -- forbidden
+        new_art = Art()
+        if users.get_current_user():
+            new_art.user_id = users.get_current_user().user_id()
+        new_art.title = self.request.get('title[]')
+        new_art.description = self.request.get('description[]')
+        art_image = self.request.get('userfile')
+        art_image = images.resize(art_image, 600, 600)
+        new_art.image = art_image
+        new_art.put()
+
+
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+    ('(?i)/upload', UploadHandler),
+    ('/image/([-\w]+)', ImageHandler)
 ], debug=True)
