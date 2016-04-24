@@ -30,6 +30,7 @@ class UploadHandler(BasePageHandler):
         file_size = len(art_image)
         art_image = images.resize(art_image, 600, 600)
         new_art.image = art_image
+        new_art.put()
 
         response_body = {
             "files": [ {
