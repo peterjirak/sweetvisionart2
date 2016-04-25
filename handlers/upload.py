@@ -1,3 +1,4 @@
+import re
 import json
 
 from google.appengine.api import users
@@ -30,13 +31,20 @@ class UploadHandler(BasePageHandler):
         file_size = len(art_image)
         art_image = images.resize(art_image, 600, 600)
         new_art.image = art_image
-        new_art.put()
+        new_key = new_art.put()
+
+        new_image_url = self.request.application_url
+        if not re.match(r"^.*/$", new_image_url):
+            new_image_url += '/'
+        new_image_url += 'image/' + new_key.urlsafe()
 
         response_body = {
             "files": [ {
                 "name": filename,
-                "size": file_size
-            } ]
+                "size": file_size,
+                "thumbnail_url": new_image_url,
+                "url": new_image_url
+            }]
         }
 
         self.response.headers['Content-Type'] = 'image/jpeg'
