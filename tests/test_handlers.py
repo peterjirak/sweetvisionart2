@@ -1,8 +1,16 @@
+import re
+import os
+import collections
+
+from google.appengine.ext import ndb
 from google.appengine.ext import testbed
+from google.appengine.api import images
 import unittest
 import webtest
+import json
 import main
 from models.user import User
+from models.art import Art
 
 
 class HandlerTest(unittest.TestCase):
@@ -71,4 +79,79 @@ class HandlerTest(unittest.TestCase):
 
         self.assertEqual(response.status_int, 302)
 
-        self.assertRegexpMatches(response.headers.get('Location'), r"https://www\.google\.com/accounts/Login\?continue=http.*/register_user" )
+        self.assertRegexpMatches(response.headers.get('Location'),
+                                 r"https://www\.google\.com/accounts/Login\?continue=http.*/register_user")
+
+    def test_uploading_an_image(self):
+        # Setup a user for the test:
+        self.setup_non_registered_user(user_email='test_user4@test.com',
+                                       user_id=4,
+                                       user_is_admin=0)
+
+        # Add a user to the datastore -- a registered user is one in the datastore:
+        User.add_or_get_user(user_id=2, email='test_user4@test.com', first_name='Test4', last_name='User')
+
+        # Load test image data from test file:
+        test_image_file = os.path.dirname(__file__) + '/data/image_files/yellow_daisy.jpg'
+
+        rfh = open(test_image_file, 'r')
+        image_data = rfh.read()
+        rfh.close()
+
+        # Make a POST request to the app to load the test image:
+        response = self.testapp.post('/upload',
+                                     params=collections.OrderedDict([('title[]', 'Yellow Daisy'),
+                                                                     ('description[]', 'Photograph of a yellow daisy ' +
+                                                                      'taken on a Summer photo walk.')]),
+                                     upload_files=[('userfile', 'yellow_daisy.jpg', image_data)])
+
+        # The status code should be 200 -- OK:
+        self.assertEqual(response.status_int, 200)
+
+        # The response Content-Type should be 'application/json':
+        self.assertEqual(response.headers.get('Content-Type'), 'application/json')
+
+        # Load the JSON response from the response body:
+        body_text = response.body
+        json_response = None
+        image_key = None
+        try:
+            json_response = json.loads(body_text)
+        except ValueError:
+            self.fail("Failed to load JSON response from response body.")
+
+        if json_response is not None:
+            # Test the contents of the JSON object loaded from the response:
+            self.assertTrue(isinstance(json_response, dict))
+
+            files = json_response.get('files')
+            self.assertTrue(isinstance(files, list))
+            self.assertEqual(len(files), 1)
+            file_arg = files[0]
+            url = file_arg.get('url', '')
+            self.assertRegexpMatches(file_arg.get('url'), r"^https{0,1}://.*/image/\w+$")
+            self.assertRegexpMatches(file_arg.get('thumbnail_url'), r"^https{0,1}://.*/image/\w+$")
+            self.assertEqual(file_arg.get('name'), 'yellow_daisy.jpg')
+            self.assertEqual(file_arg.get('size'), 366536)
+
+            image_key_match = re.match(r"^https{0,1}://.*/image/(\w+)$", url)
+            if image_key_match:
+                image_key = image_key_match.group(1)
+        else:
+            self.fail("No JSON response received from POST /upload request")
+
+        if image_key is not None:
+            # The test image should exist in the database -- check for it using the key:
+            art_key = ndb.Key(urlsafe=image_key)
+            art = Art.get_by_id(art_key.id())
+            self.assertTrue(isinstance(art, Art))
+            self.assertEqual(art.user_id, '4')
+            self.assertEqual(art.title, 'Yellow Daisy')
+            self.assertEqual(art.description, 'Photograph of a yellow daisy taken on a Summer photo walk.')
+
+            # We resize the image before adding it to the database, so before we can check the image
+            # in the database against the test source, we have to resize the test source data the same way:
+            resized_image_data = images.resize(image_data, 600, 600)
+            self.assertEqual(art.image, resized_image_data)
+        else:
+            self.fail("No art key retrieved from JSON response")

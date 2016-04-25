@@ -46,5 +46,5 @@ class UploadHandler(BasePageHandler):
             }]
         }
 
-        self.response.headers['Content-Type'] = 'image/jpeg'
+        self.response.headers['Content-Type'] = 'application/json'
         self.response.write(json.dumps(response_body))
