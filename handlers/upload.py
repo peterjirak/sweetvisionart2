@@ -7,43 +7,72 @@ from google.appengine.api import images
 from handlers.base import BasePageHandler
 
 from models.art import Art
+from models.user import User
 
 
 class UploadHandler(BasePageHandler):
     def get(self):
-        if not users.get_current_user():
+        if not self.google_user or not self.application_user:
             return self.redirect("/register_user")
         template = self.get_template('templates/file_upload.html')
         self.response.write(template.render(self.template_values))
 
     def post(self):
-        # TODO : Handle post request from non-logged in user (Respond with an HTTP Error code of 403 -- forbidden)
-        # TODO : Make adding an image to the Google datastore strongly consistent
-        # TODO : Create a URL for the image detail page -- add that URL to the response in the url field
-        new_art = Art()
-        if users.get_current_user():
-            new_art.user_id = users.get_current_user().user_id()
-        new_art.title = self.request.get('title[]')
-        new_art.description = self.request.get('description[]')
+        file_response = {}
+
+        title = self.request.get('title[]')
+        if title is not None:
+            title = title.strip()
+        description = self.request.get('description[]')
+        if description is not None:
+            description = description.strip()
         filename = self.request.POST.get('userfile').filename
         art_image = self.request.get('userfile')
         file_size = len(art_image)
-        art_image = images.resize(art_image, 600, 600)
-        new_art.image = art_image
-        new_key = new_art.put()
 
-        new_image_url = self.request.application_url
-        if not re.match(r"^.*/$", new_image_url):
-            new_image_url += '/'
-        new_image_url += 'image/' + new_key.urlsafe()
+        file_response['name'] = filename
+        file_response['size'] = file_size
+        error = None
+
+        application_user_id = None
+        google_user = users.get_current_user()
+
+        if not google_user:
+            error = 'You must login before you can POST an image to /upload'
+        else:
+            google_user_id = google_user.user_id()
+            if not google_user_id:
+                error = 'You must login before you can POST an image to /upload'
+            else:
+                application_user = User.get_user_by_google_user_id(google_user_id)
+                if not application_user:
+                    error = 'You must register before you can POST an image to /upload'
+                else:
+                    application_user_id = application_user.application_user_id
+                    if not application_user_id:
+                        error = 'You must register before you can POST an image to /upload'
+
+        if error is not None:
+            file_response['error'] = error
+            self.response.status = '401 Unauthorized'
+        else:
+            new_art = Art()
+            new_art.title = title
+            new_art.description = description
+            new_art.application_user_id = application_user_id
+            new_art.image = images.resize(art_image, 600, 600)
+            new_key = new_art.put()
+
+            new_image_url = self.request.application_url
+            if not re.match(r"^.*/$", new_image_url):
+                new_image_url += '/'
+            new_image_url += 'image/' + new_key.urlsafe()
+
+            file_response['url'] = new_image_url
+            file_response['thumbnail_url'] = new_image_url
 
         response_body = {
-            "files": [ {
-                "name": filename,
-                "size": file_size,
-                "thumbnail_url": new_image_url,
-                "url": new_image_url
-            }]
+            "files": [file_response]
         }
 
         self.response.headers['Content-Type'] = 'application/json'

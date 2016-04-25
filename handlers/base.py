@@ -20,25 +20,25 @@ class BasePageHandler(webapp2.RequestHandler):
         super(BasePageHandler, self).__init__(request, response)
         self.LogInOutURL = users.create_logout_url('/')
         self.template_values = {}
-        self.user = None
-        self.current_user = None
-        current_user = users.get_current_user()
-        if current_user:
-            self.current_user = current_user
+        self.application_user = None
+        self.google_user = None
+        google_user = users.get_current_user()
+        if google_user:
+            self.google_user = google_user
             self.logged_in = True
-            user_id = current_user.user_id()
-            user = User.get_user_by_id(user_id)
-            if user:
-                self.user = user
-                display_user_name = user.first_name + ' ' + user.last_name
+            google_user_id = google_user.user_id()
+            application_user = User.get_user_by_google_user_id(google_user_id)
+            if application_user:
+                self.application_user = application_user
+                display_user_name = application_user.first_name + ' ' + application_user.last_name
                 self.template_values['display_user_name'] = display_user_name
             else:
-                if current_user.email():
-                    display_user_name = current_user.email()
-                elif current_user.nickname():
-                    display_user_name = current_user.nickname()
+                if google_user.email():
+                    display_user_name = google_user.email()
+                elif google_user.nickname():
+                    display_user_name = google_user.nickname()
                 else:
-                    display_user_name = current_user.user_id()
+                    display_user_name = 'Sweet Vision User'
 
                 self.template_values['display_user_name'] = display_user_name
         else:
