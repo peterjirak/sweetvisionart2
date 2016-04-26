@@ -27,6 +27,16 @@ class VisitorHandler(webapp2.RequestHandler):
             visitor['email'] = None
             if visitor_instance.email is not None:
                 visitor['email'] = str(visitor_instance.email)
+            visitor['auth_domain'] = None
+            if visitor_instance.auth_domain is not None:
+                visitor['auth_domain'] = str(visitor_instance.auth_domain)
+            visitor['nickname'] = None
+            if visitor_instance.nickname is not None:
+                visitor['nickname'] = str(visitor.nickname)
+            if visitor_instance.is_admin:
+                visitor['is_admin'] = True
+            else:
+                visitor['is_admin'] = False
             visitor['google_user_object'] = None
             if visitor_instance.google_user_object is not None:
                 visitor['google_user_object'] = str(visitor_instance.google_user_object)
