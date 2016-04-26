@@ -1,7 +1,6 @@
 from google.appengine.ext import ndb
 from google.appengine.api import images
 
-import webapp2
 from handlers.base import BasePageHandler
 
 from models.art import Art

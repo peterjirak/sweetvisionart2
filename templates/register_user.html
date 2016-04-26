@@ -18,6 +18,10 @@
                 <label>Email: <input class="form-control" id="email" name="email" type="email" placeholder="Email" required/></label>
             </div>
         {% endif %}
+        {%  if after_registration_continue_to %}
+            <input type="hidden" id="after_registration_continue_to" name="after_registration_continue_to" value="{{ after_registration_continue_to }}">
+        {% endif %}
+
             <button type="submit" class="btn btn-default">Register</button>
         </form>
     </div>

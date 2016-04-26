@@ -23,6 +23,8 @@ class BasePageHandler(webapp2.RequestHandler):
         self.template_values = {}
         self.application_user = None
         self.google_user = None
+        self.logged_in = None
+        self.redirected = False
         google_user = users.get_current_user()
         if google_user:
             try:

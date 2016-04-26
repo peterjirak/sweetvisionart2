@@ -4,16 +4,19 @@ import json
 from google.appengine.api import users
 from google.appengine.api import images
 
-from handlers.base import BasePageHandler
+from handlers.base_registered_user_handler import BaseRegisteredUserPageHandler
 
 from models.art import Art
 from models.user import User
 
 
-class UploadHandler(BasePageHandler):
+class UploadHandler(BaseRegisteredUserPageHandler):
     def get(self):
-        if not self.google_user or not self.application_user:
-            return self.redirect("/register_user")
+        if self.redirected:
+            # The call was redirected in the __init__ -- do not do anything in this
+            # handler -- just return
+            return
+
         template = self.get_template('templates/file_upload.html')
         self.response.write(template.render(self.template_values))
 
