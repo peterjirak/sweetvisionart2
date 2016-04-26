@@ -27,7 +27,7 @@ class BasePageHandler(webapp2.RequestHandler):
         google_user = users.get_current_user()
         if google_user:
             try:
-                Visitor.add_or_get_visitor(google_user)
+                Visitor.add_or_get_current_user_as_visitor()
             except Exception as e:
                 # Simply ignore failures to add the google_user object as a Visitor to our model for now:
                 pass
