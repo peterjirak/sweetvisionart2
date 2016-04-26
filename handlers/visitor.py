@@ -1,14 +1,14 @@
 import json
 import time
-import datetime
 import webapp2
 
 from google.appengine.api import users
 from models.visitor import Visitor
+from handlers.base import BasePageHandler
 
 
-class VisitorHandler(webapp2.RequestHandler):
-    def get(self,):
+class VisitorHandler(BasePageHandler):
+    def get(self):
         # Only let an admin user retrieve the information about visitors:
         if not users.is_current_user_admin():
             self.response.headers['Content-Type'] = 'application/json'

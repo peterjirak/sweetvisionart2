@@ -1,12 +1,9 @@
-from google.appengine.api import users
-
-from handlers.base_registered_user_handler import BaseRegisteredUserPageHandler
+from handlers.base import BasePageHandler
 
 from models.art import Art
-from models.profile import Profile
 
 
-class MainHandler(BaseRegisteredUserPageHandler):
+class MainHandler(BasePageHandler):
     def get(self):
         art_item = Art()
         art_list = art_item.get_art()

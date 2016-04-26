@@ -2,11 +2,12 @@ from google.appengine.ext import ndb
 from google.appengine.api import images
 
 import webapp2
+from handlers.base import BasePageHandler
 
 from models.art import Art
 
 
-class ImageHandler(webapp2.RequestHandler):
+class ImageHandler(BasePageHandler):
     def get(self, id, flag=None):
         art_for_image = Art()
         key = ndb.Key(urlsafe=id)

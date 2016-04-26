@@ -37,14 +37,6 @@ class HandlerTest(unittest.TestCase):
         response = self.testapp.get('/')
         self.assertEqual(response.status_int, 200)
 
-    def test_get_main_page_with_non_registered_user(self):
-        """Test a GET / and check a 302 status"""
-        self.setup_non_registered_user(user_email='test_user1@test.com',
-                                       google_user_id=1,
-                                       user_is_admin=0)
-        response = self.testapp.get('/')
-        self.assertEqual(response.status_int, 302)
-
     def test_get_main_page_with_registered_user(self):
         """Test a GET / and check a 200 status"""
         self.setup_non_registered_user(user_email='test_user2@test.com',

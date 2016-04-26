@@ -1,7 +1,6 @@
 import re
 import os
 
-import jsonpickle
 from google.appengine.api import users
 
 import webapp2
@@ -28,7 +27,7 @@ class BasePageHandler(webapp2.RequestHandler):
         if google_user:
             try:
                 Visitor.add_or_get_current_user_as_visitor()
-            except Exception as e:
+            except:
                 # Simply ignore failures to add the google_user object as a Visitor to our model for now:
                 pass
             self.google_user = google_user
