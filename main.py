@@ -21,10 +21,12 @@ from handlers.main import MainHandler
 from handlers.upload import UploadHandler
 from handlers.image import ImageHandler
 from handlers.register_user import RegisterUserHandler
+from handlers.visitor import VisitorHandler
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
     ('(?i)/upload', UploadHandler),
     ('/image/([-\w]+)', ImageHandler),
-    ('/register_user', RegisterUserHandler)
+    ('/register_user', RegisterUserHandler),
+    ('/visitors', VisitorHandler)
 ], debug=True)

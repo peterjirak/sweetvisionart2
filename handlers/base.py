@@ -1,6 +1,7 @@
 import re
 import os
 
+import jsonpickle
 from google.appengine.api import users
 
 import webapp2
@@ -8,6 +9,7 @@ import webapp2
 import jinja2
 
 from models.user import User
+from models.visitor import Visitor
 
 
 class BasePageHandler(webapp2.RequestHandler):
@@ -24,6 +26,11 @@ class BasePageHandler(webapp2.RequestHandler):
         self.google_user = None
         google_user = users.get_current_user()
         if google_user:
+            try:
+                Visitor.add_or_get_visitor(google_user)
+            except Exception as e:
+                # Simply ignore failures to add the google_user object as a Visitor to our model for now:
+                pass
             self.google_user = google_user
             self.logged_in = True
             google_user_id = google_user.user_id()
