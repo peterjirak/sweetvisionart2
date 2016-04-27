@@ -68,6 +68,9 @@ class HandlerTest(unittest.TestCase):
         self.assertEqual(registered_user.last_name, 'User')
 
     def test_accessing_upload_page_triggers_login_redirect(self):
+        # A user has to be authenticated and registered to access the upload page.
+        # Test that if a user attempts to access the upload page without authenticating
+        # that he or she is redirected to the authentication page:
 
         response = self.testapp.get('/upload')
 
@@ -75,6 +78,22 @@ class HandlerTest(unittest.TestCase):
 
         self.assertRegexpMatches(response.headers.get('Location'), r"^https://www\.google\.com/accounts/Login\?" +
                                  "continue=http%3A//testbed\.example\.com/upload")
+
+    def test_accessing_upload_page_triggers_user_registration(self):
+        # A user has to be authenticated and registered to access the upload page.
+        # Test that if an authenticated user attempts to access the upload page without registering
+        # that he or she is redirected to the registration page:
+
+        # Mock authenticate the user, but do not register the user:
+        self.setup_non_registered_user(user_email='test_user1@test.com',
+                                       google_user_id=1,
+                                       user_is_admin=0)
+
+        response = self.testapp.get('/upload')
+
+        self.assertEqual(response.status_int, 302)
+        self.assertRegexpMatches(response.headers.get('Location'), r"^https{0,1}://[^/]+/register_user\?" +
+                                 "continue=http%3A%2F%2.*?%2Fupload")
 
     def test_uploading_an_image(self):
         # Setup a user for the test:
