@@ -26,7 +26,7 @@ class HandlerTest(unittest.TestCase):
     def tearDown(self):
         self.testbed.deactivate()
 
-    def setup_non_registered_user(self, user_email, google_user_id, user_is_admin):
+    def mock_authenticated_user(self, user_email, google_user_id, user_is_admin):
         self.testbed.setup_env(USER_EMAIL=user_email,
                                USER_ID=str(google_user_id),
                                USER_IS_ADMIN=str(user_is_admin),
@@ -39,9 +39,9 @@ class HandlerTest(unittest.TestCase):
 
     def test_get_main_page_with_registered_user(self):
         """Test a GET / and check a 200 status"""
-        self.setup_non_registered_user(user_email='test_user2@test.com',
-                                       google_user_id=2,
-                                       user_is_admin=0)
+        self.mock_authenticated_user(user_email='test_user2@test.com',
+                                     google_user_id=2,
+                                     user_is_admin=0)
 
         # Add a user to the datastore -- a registered user is one in the datastore:
         User.add_or_get_user(google_user_id=2, email='test_user2@test.com', first_name='Test2', last_name='User')
@@ -50,9 +50,9 @@ class HandlerTest(unittest.TestCase):
 
     def test_register_a_user(self):
 
-        self.setup_non_registered_user(user_email='test_user3@test.com',
-                                       google_user_id=3,
-                                       user_is_admin=0)
+        self.mock_authenticated_user(user_email='test_user3@test.com',
+                                     google_user_id=3,
+                                     user_is_admin=0)
 
         response = self.testapp.post('/register_user', {'first_name': 'Test3',
                                                         'last_name': 'User'})
@@ -66,6 +66,24 @@ class HandlerTest(unittest.TestCase):
         self.assertEqual(registered_user.email, 'test_user3@test.com')
         self.assertEqual(registered_user.first_name, 'Test3')
         self.assertEqual(registered_user.last_name, 'User')
+
+    def test_attempt_to_register_a_user_without_authentication(self):
+        # Attempt to register without authenticating should result in redirection without the user being registered:
+        response = self.testapp.post('/register_user', {'first_name': 'Alan',
+                                                        'last_name': 'Turing'})
+        self.assertEqual(response.status_int, 302)
+
+        # Test that we got the expected redirect URL in the response headers Location attribute:
+        self.assertRegexpMatches(response.headers.get('Location'), r"^https://www\.google\.com/accounts/Login\?" +
+                                 "continue=http%3A//testbed\.example\.com/register_user")
+
+        # No user should be registered. If a user is regstered, there will be User objects in the datastore.
+        # Test to assure that there are no User object is the datastore -- this means the POST call to /register_user
+        # dod not register any users:
+        query = User.query().order(-User.created_at)
+        users_list = query.fetch()
+
+        self.assertTrue(isinstance(users_list, list) and len(users_list) == 0)
 
     def test_accessing_register_user_page_without_authenticating_triggers_redirect(self):
         # A user has to be authenticated to access the /register_user page.
@@ -97,9 +115,9 @@ class HandlerTest(unittest.TestCase):
         # that he or she is redirected to the registration page:
 
         # Mock authenticate the user, but do not register the user:
-        self.setup_non_registered_user(user_email='test_user1@test.com',
-                                       google_user_id=1,
-                                       user_is_admin=0)
+        self.mock_authenticated_user(user_email='test_user1@test.com',
+                                     google_user_id=1,
+                                     user_is_admin=0)
 
         response = self.testapp.get('/upload')
 
@@ -109,9 +127,9 @@ class HandlerTest(unittest.TestCase):
 
     def test_uploading_an_image(self):
         # Setup a user for the test:
-        self.setup_non_registered_user(user_email='test_user4@test.com',
-                                       google_user_id=4,
-                                       user_is_admin=0)
+        self.mock_authenticated_user(user_email='test_user4@test.com',
+                                     google_user_id=4,
+                                     user_is_admin=0)
 
         # Add a user to the datastore -- a registered user is one in the datastore:
         application_user = User.add_or_get_user(google_user_id=4, email='test_user4@test.com', first_name='Test4',
