@@ -12,7 +12,7 @@ class Art(ndb.Model):
     @classmethod
     def get_art(cls, application_user_id=None):
         qry = cls.query().order(-cls.createDate)
-        if (application_user_id):
+        if application_user_id:
             qry = cls.query(Art.application_user_id == application_user_id).order(-cls.createDate)
         art = qry.fetch(20)
 

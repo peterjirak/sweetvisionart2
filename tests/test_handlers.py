@@ -77,13 +77,13 @@ class HandlerTest(unittest.TestCase):
         self.assertRegexpMatches(response.headers.get('Location'), r"^https://www\.google\.com/accounts/Login\?" +
                                  "continue=http%3A//testbed\.example\.com/register_user")
 
-        # No user should be registered. If a user is regstered, there will be User objects in the datastore.
-        # Test to assure that there are no User object is the datastore -- this means the POST call to /register_user
-        # dod not register any users:
+        # No user should be registered. If a user is registered, there will be User objects in the datastore.
+        # Test to assure that there are no User objects in the datastore -- this means the POST call to /register_user
+        # did not register any users:
         query = User.query().order(-User.created_at)
         users_list = query.fetch()
 
-        self.assertTrue(isinstance(users_list, list) and len(users_list) == 0)
+        self.assertEqual(users_list, [])
 
     def test_accessing_register_user_page_without_authenticating_triggers_redirect(self):
         # A user has to be authenticated to access the /register_user page.
@@ -204,3 +204,99 @@ class HandlerTest(unittest.TestCase):
             self.assertEqual(art.image, resized_image_data)
         else:
             self.fail("No art key retrieved from JSON response")
+
+    def test_uploading_an_image_without_authenticating(self):
+        # Uploading requires that a user be authenticated and registered. Test uploading without
+        # authenticating and registering:
+
+        # Load test image data from test file:
+        test_image_file = os.path.dirname(__file__) + '/data/image_files/fuchsia_gerber_daisy.jpg'
+
+        rfh = open(test_image_file, 'r')
+        image_data = rfh.read()
+        rfh.close()
+
+        # Make a POST request to the app to load the test image:
+        response = self.testapp.post('/upload',
+                                     params=collections.OrderedDict([('title[]', 'Gerber Daisy'),
+                                                                     ('description[]', 'Photograph of a fuchsia ' +
+                                                                      'gerber daisy taken in Minnehaha Park in ' +
+                                                                      'Minneapolis near Sea Salt restaurant.')]),
+                                     upload_files=[('userfile', 'fuchsia_gerber_daisy.jpg', image_data)],
+                                     expect_errors=True)
+
+        # The status code should be 401 -- Unauthorized:
+        self.assertEqual(response.status_int, 401)
+
+        # The response Content-Type should be 'application/json':
+        self.assertEqual(response.headers.get('Content-Type'), 'application/json')
+
+        # Load the JSON response from the response body:
+        body_text = response.body
+        json_response = None
+        try:
+            json_response = json.loads(body_text)
+        except ValueError:
+            self.fail("Failed to load JSON response from response body.")
+
+        self.assertEqual(json_response, {'files': [{'error': 'You must login before you can POST an image to /upload',
+                                                    'name': 'fuchsia_gerber_daisy.jpg',
+                                                    'size': 1379282}]})
+
+        # No image should have been added to the datastore as an Art instance.
+        # If an image was added to the datastore, there will be Art objects in the datastore.
+        # Test to assure that there are no Art objects in the datastore -- this means the POST call to /upload
+        # did not add an images:
+        query = Art.query().order(-Art.createDate)
+        art_list = query.fetch()
+
+        self.assertEqual(art_list, [])
+
+    def test_uploading_an_image_without_registering(self):
+        # Uploading requires that a user be authenticated and registered. Test uploading without
+        # with authentication but without registration:
+        self.mock_authenticated_user(user_email='Ada.Lovelace@test.com',
+                                     google_user_id=5,
+                                     user_is_admin=0)
+
+        # Load test image data from test file:
+        test_image_file = os.path.dirname(__file__) + '/data/image_files/purple_orchid.jpg'
+
+        rfh = open(test_image_file, 'r')
+        image_data = rfh.read()
+        rfh.close()
+
+        # Make a POST request to the app to load the test image:
+        response = self.testapp.post('/upload',
+                                     params=collections.OrderedDict([('title[]', 'Purple Orchid'),
+                                                                     ('description[]', 'Photograph of a purple ' +
+                                                                      'orchid taken in my home.')]),
+                                     upload_files=[('userfile', 'purple_orchid.jpg', image_data)],
+                                     expect_errors=True)
+
+        # The status code should be 401 -- Unauthorized:
+        self.assertEqual(response.status_int, 401)
+
+        # The response Content-Type should be 'application/json':
+        self.assertEqual(response.headers.get('Content-Type'), 'application/json')
+
+        # Load the JSON response from the response body:
+        body_text = response.body
+        json_response = None
+        try:
+            json_response = json.loads(body_text)
+        except ValueError:
+            self.fail("Failed to load JSON response from response body.")
+
+        self.assertEqual(json_response, {'files': [{'error': 'You must register before you can POST an image to /upload',
+                                                    'name': 'purple_orchid.jpg',
+                                                    'size': 346669}]})
+
+        # No image should have been added to the datastore as an Art instance.
+        # If an image was added to the datastore, there will be Art objects in the datastore.
+        # Test to assure that there are no Art objects in the datastore -- this means the POST call to /upload
+        # did not add an images:
+        query = Art.query().order(-Art.createDate)
+        art_list = query.fetch()
+
+        self.assertEqual(art_list, [])
