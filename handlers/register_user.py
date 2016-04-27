@@ -2,6 +2,7 @@ import re
 
 from google.appengine.api import users
 
+from exceptions import UnauthorizedException
 from handlers.base_authenticated_user_handler import BaseAuthenticatedUserPageHandler
 from models.user import User
 
@@ -12,6 +13,13 @@ class RegisterUserHandler(BaseAuthenticatedUserPageHandler):
             # The call was redirected in the __init__ -- do not do anything in this
             # handler -- just return
             return
+
+        if not self.google_user:
+            # The __init__ definitions in the base classes should redirect to authentication, so this should never
+            # happen. However, we include this check if somehow this get handler is invoked but the user is not
+            # authenticated
+            raise UnauthorizedException("/register_user invoked but user has not been authenticated. " +
+                                        "Unable to handle request.")
 
         continue_to = self.request.get('continue')
         if continue_to is None or re.match(r"^\s*$", continue_to):

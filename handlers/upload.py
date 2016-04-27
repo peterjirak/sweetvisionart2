@@ -4,6 +4,7 @@ import json
 from google.appengine.api import users
 from google.appengine.api import images
 
+from exceptions import UnauthorizedException, NotRegisteredException
 from handlers.base_registered_user_handler import BaseRegisteredUserPageHandler
 
 from models.art import Art
@@ -24,6 +25,18 @@ class UploadHandler(BaseRegisteredUserPageHandler):
             # The call was redirected in the __init__ -- do not do anything in this
             # handler -- just return
             return
+
+        if not self.google_user:
+            # The __init__ definitions in the base classes should redirect to authentication, so this should never
+            # happen. However, we include this check if somehow this get handler is invoked but the user is not
+            # authenticated
+            raise UnauthorizedException("/upload invoked but user has not been authenticated. " +
+                                        "Unable to handle request.")
+        elif not self.application_user:
+            # The __init__ definitions in the base classes should redirect to /register_user, so this should never
+            # happen. However, we include this check if somehow this get handler is invoked but the user is
+            # not registered.
+            raise NotRegisteredException("/upload invoked but the user has not registered. Unable to handle request.")
 
         template = self.get_template('templates/file_upload.html')
         self.response.write(template.render(self.template_values))
