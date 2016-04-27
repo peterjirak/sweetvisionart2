@@ -69,12 +69,12 @@ class HandlerTest(unittest.TestCase):
 
     def test_accessing_upload_page_triggers_login_redirect(self):
 
-        response = self.testapp.get('/register_user')
+        response = self.testapp.get('/upload')
 
         self.assertEqual(response.status_int, 302)
 
-        self.assertRegexpMatches(response.headers.get('Location'),
-                                 r"https://www\.google\.com/accounts/Login\?continue=http.*/register_user")
+        self.assertRegexpMatches(response.headers.get('Location'), r"^https://www\.google\.com/accounts/Login\?" +
+                                 "continue=http%3A//testbed\.example\.com/upload")
 
     def test_uploading_an_image(self):
         # Setup a user for the test:
