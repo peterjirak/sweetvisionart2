@@ -67,6 +67,18 @@ class HandlerTest(unittest.TestCase):
         self.assertEqual(registered_user.first_name, 'Test3')
         self.assertEqual(registered_user.last_name, 'User')
 
+    def test_accessing_register_user_page_without_authenticating_triggers_redirect(self):
+        # A user has to be authenticated to access the /register_user page.
+        # Test that if a user attempts to access the /register_user page without authenticating
+        # that he or she is redirected to the authentication page:
+
+        response = self.testapp.get('/register_user')
+
+        self.assertEqual(response.status_int, 302)
+
+        self.assertRegexpMatches(response.headers.get('Location'), r"^https://www\.google\.com/accounts/Login\?" +
+                                 "continue=http%3A//testbed\.example\.com/register_user")
+
     def test_accessing_upload_page_triggers_login_redirect(self):
         # A user has to be authenticated and registered to access the upload page.
         # Test that if a user attempts to access the upload page without authenticating
