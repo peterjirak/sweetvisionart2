@@ -253,8 +253,8 @@ class HandlerTest(unittest.TestCase):
         self.assertEqual(art_list, [])
 
     def test_uploading_an_image_without_registering(self):
-        # Uploading requires that a user be authenticated and registered. Test uploading without
-        # with authentication but without registration:
+        # Uploading requires that a user be authenticated and registered.
+        # Test uploading with authentication but without registration:
         self.mock_authenticated_user(user_email='Ada.Lovelace@test.com',
                                      google_user_id=5,
                                      user_is_admin=0)
