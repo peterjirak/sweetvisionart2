@@ -25,7 +25,7 @@ from handlers.visitor import VisitorHandler
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
-    ('(?i)/upload', UploadHandler),
+    ('/upload', UploadHandler),
     ('/image/([-\w]+)', ImageHandler),
     ('/register_user', RegisterUserHandler),
     ('/visitors', VisitorHandler)

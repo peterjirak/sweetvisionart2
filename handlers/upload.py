@@ -11,6 +11,14 @@ from models.user import User
 
 
 class UploadHandler(BaseRegisteredUserPageHandler):
+    def __init__(self, request=None, response=None):
+        if request is not None:
+            method = request.method
+            if method == 'POST':
+                self.no_redirect = True
+
+        super(UploadHandler, self).__init__(request, response)
+
     def get(self):
         if self.redirected:
             # The call was redirected in the __init__ -- do not do anything in this

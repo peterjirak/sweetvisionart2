@@ -31,7 +31,7 @@ class VisitorHandler(BasePageHandler):
                 visitor['auth_domain'] = str(visitor_instance.auth_domain)
             visitor['nickname'] = None
             if visitor_instance.nickname is not None:
-                visitor['nickname'] = str(visitor.nickname)
+                visitor['nickname'] = str(visitor_instance.nickname)
             if visitor_instance.is_admin:
                 visitor['is_admin'] = True
             else:
