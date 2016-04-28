@@ -2,6 +2,8 @@ from handlers.base import BasePageHandler
 
 from models.art import Art
 
+# TODO : Support paging
+
 
 class MainHandler(BasePageHandler):
     def get(self):

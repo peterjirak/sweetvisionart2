@@ -18,6 +18,7 @@ class User(ndb.Model):
     google_user_id = ndb.StringProperty(required=True)
     email = ndb.StringProperty(required=True)
     first_name = ndb.StringProperty(required=True)
+    middle_name = ndb.StringProperty()  # Optional
     last_name = ndb.StringProperty(required=True)
     created_at = ndb.DateTimeProperty(required=True, auto_now_add=True)
 
@@ -38,7 +39,22 @@ class User(ndb.Model):
         return user_inst
 
     @classmethod
-    def add_or_get_user(cls, google_user_id, email, first_name, last_name):
+    def get_user_by_application_user_id(cls, application_user_id):
+        if application_user_id is not None:
+            application_user_id = str(application_user_id)
+
+        if application_user_id is None or re.match(r"^\s*$", application_user_id):
+            raise ValueError("User.get_user_by_application_user_id requires an application_user_id.")
+
+        application_user_id = application_user_id.strip()
+        qry = cls.query(User.application_user_id == application_user_id)
+
+        user_inst = qry.get()
+
+        return user_inst
+
+    @classmethod
+    def add_or_get_user(cls, google_user_id, email, first_name, last_name, middle_name=None):
         if google_user_id is not None:
             google_user_id = str(google_user_id)
 
@@ -56,6 +72,8 @@ class User(ndb.Model):
         email = email.strip()
         first_name = first_name.strip()
         last_name = last_name.strip()
+        if middle_name is not None:
+            middle_name = middle_name.strip()
 
         user_inst = User.get_user_by_google_user_id(google_user_id)
 
@@ -70,7 +88,18 @@ class User(ndb.Model):
                 raise ValueError(("A user exists for the user_id %s with the email '%s' and first_name '%s', but the " +
                                   "last_name is '%s', not '%s'.") % (google_user_id, email, first_name, user_inst.last_name,
                                                                      last_name))
+            elif middle_name is not None and middle_name != '' and user_inst.middle_name is not None and \
+                    middle_name != user_inst.middle_name:
+                raise ValueError(("A user exists for user_id %s with email '%s' and first_name is '%s' and " +
+                                  "last_name is '%s', but the middle_name is '%s', not '%s'.") %
+                                 (google_user_id, email, first_name, last_name, user_inst.middle_name,
+                                  middle_name))
             else:
+                if middle_name is not None and middle_name != '' and \
+                        (user_inst.middle_name is None or user_inst.middle_name == ''):
+                    user_inst.middle_name = middle_name
+                    user_inst.put()
+
                 return user_inst
 
         qry = cls.query(User.email == email)

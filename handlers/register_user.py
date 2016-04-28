@@ -68,11 +68,13 @@ class RegisterUserHandler(BaseAuthenticatedUserPageHandler):
         email = self.google_user.email()
 
         first_name = self.request.get('first_name')
+        middle_name = self.request.get('middle_name')
         last_name = self.request.get('last_name')
 
         if email is None or re.match(r"^\s*$", email):
             email = self.request.get('email')
 
-        User.add_or_get_user(google_user_id=google_user_id, email=email, first_name=first_name, last_name=last_name)
+        User.add_or_get_user(google_user_id=google_user_id, email=email, first_name=first_name,
+                             middle_name=middle_name, last_name=last_name)
 
         return self.redirect(continue_to)

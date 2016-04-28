@@ -12,6 +12,12 @@ indexes:
 
 - kind: Art
   properties:
+  - name: application_user_id
+  - name: createDate
+    direction: desc
+
+- kind: Art
+  properties:
   - name: user_id
   - name: createDate
     direction: desc
