@@ -9,6 +9,7 @@ import jinja2
 
 from models.user import User
 from models.visitor import Visitor
+from models.profile import Profile
 
 
 class BasePageHandler(webapp2.RequestHandler):
@@ -26,7 +27,7 @@ class BasePageHandler(webapp2.RequestHandler):
         self.logged_in = None
         self.redirected = False
         google_user = users.get_current_user()
-        if google_user:
+        if google_user is not None:
             try:
                 Visitor.add_or_get_current_user_as_visitor()
             except:
@@ -36,10 +37,19 @@ class BasePageHandler(webapp2.RequestHandler):
             self.logged_in = True
             google_user_id = google_user.user_id()
             application_user = User.get_user_by_google_user_id(google_user_id)
-            if application_user:
+            if application_user is not None:
                 self.application_user = application_user
                 display_user_name = application_user.first_name + ' ' + application_user.last_name
                 self.template_values['display_user_name'] = display_user_name
+                user_profile = Profile.get_profile_by_application_user_id(application_user.application_user_id)
+                user_page_url = self.request.application_url
+                if not re.match(r"^.*/$", user_page_url):
+                    user_page_url += '/'
+                if user_profile is not None:
+                    user_page_url += str(user_profile.profile_unique_name)
+                else:
+                    user_page_url += str(application_user.application_user_id)
+                self.template_values['user_page_url'] = user_page_url
             else:
                 if google_user.email():
                     display_user_name = google_user.email()

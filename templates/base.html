@@ -47,7 +47,7 @@
                  <li><a href="/upload">Upload</a></li>
                </ul>
                <p class="navbar-text">		{% if display_user_name %}
-                    Welcome <a href="{{ profile_unique_name }}">{{ display_user_name }}</a>
+                    Welcome {% if user_page_url %}<a href="{{ user_page_url }}">{% endif %}{{ display_user_name }}{% if user_page_url %}</a>{% endif %}
 
                     <!-- TODO Implement log out to log a user out of Sweetvision
                          TODO Implement switch user to allow a user to switch the Google authenticated
