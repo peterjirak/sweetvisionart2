@@ -33,7 +33,11 @@ class ArtistPageHandler(BasePageHandler):
                     self.template_values['profile_bio'] = profile_obj.bio
                 if profile_obj.profile_picture is not None:
                     self.template_values['profile_picture'] = profile_obj.profile_picture
-            self.template_values['art_list'] = Art.get_art(user_obj.application_user_id)
+            art_objs = Art.get_art(user_obj.application_user_id)
+            art_list = list()
+            for art_obj in art_objs:
+                art_list.append({'art_obj': art_obj})
+            self.template_values['art_list'] = art_list
             self.template_values['artist_image_count'] = len(self.template_values['art_list'])
         else:
             self.template_values['user_exists'] = False

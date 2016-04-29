@@ -5,9 +5,17 @@
 
                 <li class="span3">
                  <div class="info">
-                   <strong>{% if art.title %}{{ art.title }}{% else %} Untitled {% endif %}</strong>
+                   <strong>{% if art.art_obj.title %}{{ art.art_obj.title }}{% else %} Untitled {% endif %}</strong>
+        {% if art.artist_name %}
+                   <br />
+                   <small>
+                       by {% if art.artist_url %}<a href="{{ art.artist_url }}">{% endif %}{{ art.artist_name }}{% if art.artist_nickname %}({{ art.artist_nickname }}){% endif %}{% if art.artist_url %}</a>{% endif %}
+                   </small>
+        {% endif %}
                  </div>
-                 <div><img src="/image/{{ art.key.urlsafe() }}" /></div>
+                 <div>
+                     <img src="/image/{{ art.art_obj.key.urlsafe() }}" />
+                 </div>
                 </li>
 
     {% endfor %}

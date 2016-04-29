@@ -3,6 +3,7 @@ import re
 from google.appengine.ext import ndb
 from exceptions import UniquenessConstraintViolatedException
 
+
 class Profile(ndb.Model):
     application_user_id = ndb.StringProperty(required=True)
     profile_unique_name = ndb.StringProperty(required=True)
