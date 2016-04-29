@@ -1,6 +1,15 @@
 {% extends "templates/base.html" %}
 {% block content %}
+    {% if user_exists %}
+        {% if not profile_bio and artist_name %}
+    <h1><small>{{ artist_name }}</small></h1>
+        {%  endif %}
     <div class="container">
         {% include "templates/art.html" %}
     </div>
+    {%  else %}
+    <h1>No such artist</h1>
+    <div class="container">
+    </div>
+    {% endif %}
 {% endblock %}

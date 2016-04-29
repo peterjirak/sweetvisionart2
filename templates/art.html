@@ -1,9 +1,7 @@
 <div class="row">
     <ul class="thumbnails">
     {% for art in art_list %}
-
-
-                <li class="span3">
+               <li class="span3">
                  <div class="info">
                    <strong>{% if art.art_obj.title %}{{ art.art_obj.title }}{% else %} Untitled {% endif %}</strong>
         {% if art.artist_name %}
