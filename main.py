@@ -32,5 +32,5 @@ app = webapp2.WSGIApplication([
     ('/register_user', RegisterUserHandler),
     ('/edit_profile', EditProfileHandler),
     ('/visitors', VisitorHandler),
-    ('/([A-Za-z0-9_\-\.]{3,}$)', ArtistPageHandler)
+    ('/([A-Za-z0-9 _\-\.]{3,}$)', ArtistPageHandler)
 ], debug=True)

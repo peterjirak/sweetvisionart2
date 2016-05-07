@@ -1,5 +1,6 @@
 import re
 import os
+import urllib
 
 from google.appengine.api import users
 
@@ -46,7 +47,7 @@ class BasePageHandler(webapp2.RequestHandler):
                 if not re.match(r"^.*/$", user_page_url):
                     user_page_url += '/'
                 if user_profile is not None:
-                    user_page_url += str(user_profile.profile_unique_name)
+                    user_page_url += urllib.quote(str(user_profile.profile_unique_display_name), safe='')
                 else:
                     user_page_url += str(application_user.application_user_id)
                 self.template_values['user_page_url'] = user_page_url

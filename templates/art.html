@@ -7,7 +7,7 @@
         {% if art.artist_name %}
                    <br />
                    <small>
-                       by {% if art.artist_url %}<a href="{{ art.artist_url }}">{% endif %}{{ art.artist_name }}{% if art.artist_nickname %}({{ art.artist_nickname }}){% endif %}{% if art.artist_url %}</a>{% endif %}
+                       by {% if art.artist_url %}<a href="{{ art.artist_url }}">{% endif %}{{ art.artist_name }}{% if art.artist_nickname %} ({{ art.artist_nickname }}){% endif %}{% if art.artist_url %}</a>{% endif %}
                    </small>
         {% endif %}
                  </div>

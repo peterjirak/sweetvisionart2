@@ -1,6 +1,6 @@
 {% extends "templates/base.html" %}
 {% block content %}
-    <h1>Register</h1>
+    <h1>Profile</h1>
     <div class="container">
         {% if feedback %}
         <div class="row">
@@ -18,7 +18,7 @@
         </div>
         {% endif %}
         <div class="row">
-            <form class="form-horizontal" id="user_registration" action="/edit_profile" method="post">
+            <form class="form-horizontal" id="user_profile" action="/edit_profile" method="post" enctype="multipart/form-data">
                 <div class="form-group">
         {% if first_name %}
                     <label>First Name: <input class="form-control" id="first_name" name="first_name" type="text" placeholder="First Name" value="{{ first_name }}" required/></label>
@@ -49,6 +49,9 @@
                     <label>Email: <input class="form-control" id="email" name="email" type="email" placeholder="Email" required/></label>
                 </div>
         {% endif %}
+                <div class="form-group">
+                    <label>Profile Photo: <input class="form-control" id="profile_photo" name="profile_photo" type="file" /></label>
+                </div>
                 <div class="form-group">
         {% if profile_unique_display_name %}
                     <label>Profile Name: <input class="form-control" id="profile_unique_display_name" name="profile_unique_display_name" type="text" placeholder="Profile Name" value="{{ profile_unique_display_name }}" required/></label>

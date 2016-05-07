@@ -1,4 +1,6 @@
 import re
+import urllib
+
 from handlers.base import BasePageHandler
 
 from models.art import Art
@@ -39,13 +41,13 @@ class MainHandler(BasePageHandler):
 
             artist_nickname = None
             if profile_obj is not None:
-                artist_nickname = profile_obj.profile_unique_name
+                artist_nickname = profile_obj.profile_unique_display_name
                 art['artist_nickname'] = artist_nickname
 
             if user_obj is not None:
                 art['artist_name'] = user_obj.first_name + ' ' + user_obj.last_name
                 if artist_nickname is not None:
-                    art['artist_url'] = application_url + artist_nickname
+                    art['artist_url'] = application_url + urllib.quote(artist_nickname, safe='')
                 else:
                     art['artist_url'] = application_url + app_user_id
             art_list.append(art)
