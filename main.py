@@ -21,6 +21,7 @@ from handlers.main import MainHandler
 from handlers.upload import UploadHandler
 from handlers.image import ImageHandler
 from handlers.register_user import RegisterUserHandler
+from handlers.edit_profile import EditProfileHandler
 from handlers.visitor import VisitorHandler
 from handlers.artist import ArtistPageHandler
 
@@ -29,6 +30,7 @@ app = webapp2.WSGIApplication([
     ('/upload', UploadHandler),
     ('/image/([-\w]+)', ImageHandler),
     ('/register_user', RegisterUserHandler),
+    ('/edit_profile', EditProfileHandler),
     ('/visitors', VisitorHandler),
     ('/([A-Za-z0-9_\-\.]{3,}$)', ArtistPageHandler)
 ], debug=True)

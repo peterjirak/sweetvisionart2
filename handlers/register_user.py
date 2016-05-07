@@ -50,8 +50,8 @@ class RegisterUserHandler(BaseAuthenticatedUserPageHandler):
                not re.match(r"^\s*$", self.application_user.first_name):
                 self.template_values['first_name'] = self.application_user.first_name
 
-            if self.application_user.first_name is not None and \
-               not re.match(r"^\s*$", self.application_user.first_name):
+            if self.application_user.middle_name is not None and \
+               not re.match(r"^\s*$", self.application_user.middle_name):
                 self.template_values['middle_name'] = self.application_user.middle_name
 
             if self.application_user.last_name is not None and \
